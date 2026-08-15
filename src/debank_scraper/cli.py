@@ -7,7 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from dotenv import load_dotenv
 
-from debank_scraper.scraper import DeBankScraper
+from debank_scraper.scraper import DeBankScraper, clean_address
 
 
 def main():
@@ -42,7 +42,10 @@ def main():
 
     args = parser.parse_args()
 
-    if not args.address or args.address == "your_default_address_here":
+    raw_address = args.address or ""
+    address = clean_address(raw_address)
+
+    if not address or address == "your_default_address_here":
         print(
             "❌ Error: EVM wallet address must be provided as an argument or via EVM_ADDRESS env var.",
             file=sys.stderr,
@@ -53,24 +56,27 @@ def main():
     current_date = datetime.now().strftime("%Y-%m-%d")
     output_target = args.output
     if not output_target:
-        data_dir = (
+        raw_dir = (
             os.getenv("PORTFOLIO_DATA_DIR")
             or os.getenv("DATA_DIR")
             or "./data"
-        )
-        output_path = Path(data_dir) / f"{current_date}_raw_debank.json"
+        ).strip().strip("'\"")
+        output_path = Path(raw_dir).expanduser().resolve() / f"{current_date}_raw_debank.json"
     else:
-        target_path = Path(output_target)
-        if target_path.is_dir() or output_target.endswith("/"):
+        clean_target = output_target.strip().strip("'\"")
+        target_path = Path(clean_target).expanduser().resolve()
+        if target_path.is_dir() or clean_target.endswith("/") or not target_path.suffix:
+            target_path.mkdir(parents=True, exist_ok=True)
             output_path = target_path / f"{current_date}_raw_debank.json"
         else:
+            target_path.parent.mkdir(parents=True, exist_ok=True)
             output_path = target_path
 
-    print(f"Scraping DeBank for wallet: {args.address}...", file=sys.stderr)
+    print(f"Scraping DeBank for wallet: {address}...", file=sys.stderr)
     scraper = DeBankScraper(headless=not args.no_headless, timeout=args.timeout)
 
     try:
-        data = asyncio.run(scraper.scrape_to_file(args.address, output_path))
+        data = asyncio.run(scraper.scrape_to_file(address, output_path))
         net_worth = data.get("wallet", {}).get("total_net_worth", "N/A")
         tokens_count = len(data.get("tokens", []))
         protocols_count = len(data.get("protocols", []))

@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -20,7 +21,7 @@ SCRAPING_JS = r"""
     };
 
     // 1. Overview & Social
-    const netWorthEl = document.querySelector("div[class*='HeaderInfo_totalAssetInner'], div[class*='HeaderInfo_totalAsset']");
+    const netWorthEl = document.querySelector("div[class*='HeaderInfo_totalAssetInner'], div[class*='HeaderInfo_totalAsset'], div[class*='HeaderInfo_totalAssetValue']");
     const changeEl = document.querySelector("div[class*='HeaderInfo_changePercent'], [class*='HeaderInfo_isLoss'], [class*='HeaderInfo_isProfit']");
 
     data.wallet.total_net_worth = netWorthEl ? (netWorthEl.querySelector("[class*='Value']")?.innerText.trim() || netWorthEl.innerText.split('\n')[0].trim()) : null;
@@ -189,6 +190,14 @@ async def _auto_scroll(page):
     """)
 
 
+def clean_address(addr: str) -> str:
+    """Clean and validate EVM address, removing quotes and whitespace."""
+    if not addr:
+        return ""
+    cleaned = addr.strip().strip("'\"").strip()
+    return cleaned.lower()
+
+
 class DeBankScraper:
     """
     Playwright-based scraper for DeBank profile pages.
@@ -202,10 +211,13 @@ class DeBankScraper:
         """
         Scrape complete portfolio breakdown for a given EVM wallet address.
         """
-        clean_address = address.strip().lower()
-        profile_url = f"https://debank.com/profile/{clean_address}"
+        addr = clean_address(address)
+        if not addr:
+            raise ValueError("Invalid EVM wallet address: empty address provided.")
 
-        logger.info(f"Starting DeBank scrape for {clean_address}")
+        profile_url = f"https://debank.com/profile/{addr}"
+        logger.info(f"Starting DeBank scrape for {addr} at {profile_url}")
+
         async with async_playwright() as p:
             browser = None
             try:
@@ -220,8 +232,7 @@ class DeBankScraper:
             page = await context.new_page()
 
             try:
-                logger.debug(f"Navigating to {profile_url}")
-                await page.goto(profile_url, wait_until="load", timeout=self.timeout)
+                await page.goto(profile_url, wait_until="domcontentloaded", timeout=self.timeout)
 
                 # Wait for total assets element
                 try:
@@ -230,7 +241,7 @@ class DeBankScraper:
                         timeout=self.timeout,
                     )
                 except Exception as e:
-                    logger.warning(f"Timed out waiting for total assets selector: {e}")
+                    logger.warning(f"Selector wait warning for {addr}: {e}")
 
                 # Click unfold chains button if present
                 try:
@@ -246,7 +257,7 @@ class DeBankScraper:
                 await page.wait_for_timeout(2000)
 
                 data = await page.evaluate(SCRAPING_JS)
-                data["wallet"]["address"] = clean_address
+                data["wallet"]["address"] = addr
                 return data
 
             finally:
@@ -258,7 +269,8 @@ class DeBankScraper:
         Scrape portfolio data and save to JSON file.
         """
         data = await self.scrape(address)
-        path = Path(output_path).resolve()
+        clean_out = str(output_path).strip().strip("'\"")
+        path = Path(clean_out).expanduser().resolve()
         path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
