@@ -1,5 +1,6 @@
 # DeBank Scraper
 
+[![PyPI version](https://img.shields.io/pypi/v/debank-scraper.svg)](https://pypi.org/project/debank-scraper/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python: 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![MCP Server](https://img.shields.io/badge/MCP-Compatible-green.svg)](https://modelcontextprotocol.io/)
@@ -28,6 +29,23 @@ An asynchronous, headless browser-based scraper and **Model Context Protocol (MC
 ---
 
 ## 📦 Installation
+
+### From PyPI (Recommended)
+
+```bash
+# Using uv (recommended)
+uv add debank-scraper
+# or install CLI globally
+uv tool install debank-scraper
+
+# Using pip
+pip install debank-scraper
+
+# Install browser binaries
+playwright install chromium
+```
+
+### From Source
 
 ```bash
 # Clone the repository

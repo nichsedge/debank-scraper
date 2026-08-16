@@ -34,11 +34,12 @@ classifiers = [
 dependencies = [
     "playwright>=1.40.0",
     "python-dotenv>=1.0.0",
-    "mcp>=0.9.0",
+    "mcp>=1.0.0,<2",
 ]
 
 [project.urls]
 Homepage = "https://github.com/nichsedge/debank-scraper"
+Documentation = "https://github.com/nichsedge/debank-scraper#readme"
 Repository = "https://github.com/nichsedge/debank-scraper.git"
 "Bug Tracker" = "https://github.com/nichsedge/debank-scraper/issues"
 
