@@ -20,8 +20,8 @@ def main():
     parser.add_argument(
         "address",
         nargs="?",
-        default=os.getenv("EVM_ADDRESS"),
-        help="EVM wallet address (defaults to EVM_ADDRESS environment variable)",
+        default=os.getenv("ETH_ADDRESS"),
+        help="EVM wallet address (defaults to ETH_ADDRESS environment variable)",
     )
     parser.add_argument(
         "-o",
@@ -47,7 +47,7 @@ def main():
 
     if not address or address == "your_default_address_here":
         print(
-            "❌ Error: EVM wallet address must be provided as an argument or via EVM_ADDRESS env var.",
+            "❌ Error: EVM wallet address must be provided as an argument or via ETH_ADDRESS env var.",
             file=sys.stderr,
         )
         sys.exit(1)

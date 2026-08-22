@@ -76,7 +76,7 @@ uv run debank-scrape 0x1234567890abcdef1234567890abcdef12345678 -o ./output/port
 uv run debank-scrape 0x1234567890abcdef1234567890abcdef12345678 --no-headless
 
 # Use environment variables
-export EVM_ADDRESS="0x1234567890abcdef1234567890abcdef12345678"
+export ETH_ADDRESS="0x1234567890abcdef1234567890abcdef12345678"
 export PORTFOLIO_DATA_DIR="./data"
 uv run debank-scrape
 ```
@@ -85,7 +85,7 @@ uv run debank-scrape
 
 | Option | Flag | Description |
 | :--- | :--- | :--- |
-| `address` | Positional | Target EVM address (or defaults to `EVM_ADDRESS` env var) |
+| `address` | Positional | Target EVM address (or defaults to `ETH_ADDRESS` env var) |
 | Output Path | `-o`, `--output` | Destination file or directory for the output JSON |
 | Visible Mode | `--no-headless` | Open browser window in non-headless mode |
 | Timeout | `--timeout` | Page load timeout in milliseconds (default: `30000`) |
