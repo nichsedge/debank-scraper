@@ -34,7 +34,7 @@ classifiers = [
 dependencies = [
     "playwright>=1.40.0",
     "python-dotenv>=1.0.0",
-    "mcp>=1.0.0,<2",
+    "mcp>=2.1.0,<3",
 ]
 
 [project.urls]
