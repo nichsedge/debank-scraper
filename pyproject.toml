@@ -34,7 +34,7 @@ classifiers = [
 dependencies = [
     "playwright>=1.62.0",
     "python-dotenv>=1.2.3",
-    "mcp>=2.1.0,<3",
+    "mcp>=2.1.1,<3",
 ]
 
 [project.urls]
@@ -53,5 +53,5 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
-    "pytest>=8.4.2",
+    "pytest>=9.1.1",
 ]
